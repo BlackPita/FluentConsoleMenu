@@ -1,7 +1,7 @@
 ﻿namespace FluentConsoleMenu.Interfaces;
 
-public interface ICanSetColors : ICanSetMaximumToDisplay
+public interface ICanSetColors : ICanSetMaximumEntriesToDisplay
 {
-    public ICanSetMaximumToDisplay WithColors(ConsoleColor foregroundColor, ConsoleColor backgroundColor);
+    public ICanSetMaximumEntriesToDisplay WithColors(ConsoleColor foregroundColor, ConsoleColor backgroundColor);
 
 }

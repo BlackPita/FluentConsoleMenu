@@ -1,18 +1,19 @@
-﻿using FluentConsoleMenu.Models;
+﻿namespace FluentConsoleMenu;
 
-namespace FluentConsoleMenu;
-
+using Models;
 using Interfaces;
 using System;
 
-public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICanSetColors , ICanSetMaximumToDisplay, ICanSetMenuItems
+public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICanSetColors , ICanSetMaximumEntriesToDisplay, ICanSetMenuItems
 {
 
     private readonly Menu _menu;
+    private string _selected;
 
     private FluentConsoleMenuGenerator()
     {
         this._menu = new Menu();
+        this._selected = string.Empty;
     }
 
     public static ICanSetTitle CreateBuilder()
@@ -33,14 +34,14 @@ public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICan
         return this;
     }
 
-    public ICanSetMaximumToDisplay WithColors(ConsoleColor foregroundColor, ConsoleColor backgroundColor)
+    public ICanSetMaximumEntriesToDisplay WithColors(ConsoleColor foregroundColor, ConsoleColor backgroundColor)
     {
         this._menu.ForegroundColor = foregroundColor;
         this._menu.BackgroundColor = backgroundColor;
         return this;
     }
 
-    public ICanSetMenuItems MaximumToDisplay(int max)
+    public ICanSetMenuItems MaximumEntriesToDisplay(int max)
     {
         this._menu.MaximumToDisplay = max;
         return this;
@@ -48,83 +49,27 @@ public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICan
 
     public string ShowMenu()
     {
-        ConsoleKey key;
-
         InitializeScreen();
+
         DisplayTitle();
+        
         DisplayMenuItems();
 
-        var selected = 0;
-
-        do
-        {
-            key = Console.ReadKey(true).Key;
-            switch (key)
-            {
-                case ConsoleKey.UpArrow:
-                    if (selected != 0)
-                    {
-                        selected--;
-                    }
-
-                    break;
-                case ConsoleKey.DownArrow:
-                    if (selected < _menu.MenuItems.Count -1 )
-                    {
-                        selected += 1;
-                    }
-                    break;
-            }
-
-            Console.SetCursorPosition(10, 10);
-            Console.WriteLine($"selected: {selected} _menu.MaximumToDisplay: {_menu.MaximumToDisplay}");
-
-
-            if (selected < _menu.MaximumToDisplay - 1)
-            {
-                for (var i = 0; i < _menu.MaximumToDisplay; i++)
-                {
-
-                    if (i == selected)
-                    {
-                        DisplayMenuItem(i, _menu.MenuItems[i], ConsoleColor.Black, ConsoleColor.White);
-                    }
-                    else
-                    {
-                        DisplayMenuItem(i, _menu.MenuItems[i], ConsoleColor.White, ConsoleColor.Black);
-                    }
-                }
-            }
-            else
-            {
-                for (var i = 0; i < _menu.MaximumToDisplay-1; i++)
-                {
-                    DisplayMenuItem(i, _menu.MenuItems[selected - (_menu.MaximumToDisplay-1) + i], ConsoleColor.White, ConsoleColor.Black);
-                }
-                
-                DisplayMenuItem(_menu.MaximumToDisplay-1 , _menu.MenuItems[selected], ConsoleColor.Black, ConsoleColor.White);
-            }
-
-        }
-        while (key != ConsoleKey.Enter);
+        GetSelection();
 
         CleanUp();
 
-        return _menu.MenuItems[selected];
+        return _selected;
     }
-
-
     public ICanSetMenuItems WithMenuItem(string menuItem)
     {
         this._menu.MenuItems.Add(menuItem);
         return this;
     }
-
-    private void InitializeScreen()
+    private static void InitializeScreen()
     {
         Console.CursorVisible = false;
         Console.Clear();
-
     }
     private void DisplayTitle()
     {
@@ -146,19 +91,35 @@ public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICan
 
         for (var i = 0; i <= _menu.MaximumToDisplay-1; i++)
         {
-            if (i == 0)
-            {
-                DisplayMenuItem(i, _menu.MenuItems[i], ConsoleColor.Black, ConsoleColor.White);
-            }
-            else
-            {
-                DisplayMenuItem(i, _menu.MenuItems[i], ConsoleColor.White, ConsoleColor.Black);
-            }
+            DisplayMenuItem(i, _menu.MenuItems[i], selected: i == 0);
         }
 
     }
 
-    private void DisplayMenuItem(int i,string menuItem, ConsoleColor fgColor, ConsoleColor bgColor)
+    private void DisplayMenuItem(int i, string menuItem, bool selected = false)
+    {
+        var x = _menu.X + _menu.OffsetX;
+        var y = _menu.Y + _menu.OffsetY + i;
+
+        var backGroundSave = Console.BackgroundColor;
+        var foreGroundSave = Console.ForegroundColor;
+        var maxMenuItemLength = _menu.MenuItems.Aggregate((max, cur) => max.Length > cur.Length ? max : cur).Length;
+
+        Console.SetCursorPosition(x, y);
+        Console.WriteLine(new string(' ', maxMenuItemLength + 2));
+
+        Console.SetCursorPosition(x, y);
+
+        Console.ForegroundColor = selected ? _menu.BackgroundColor : _menu.ForegroundColor;
+        Console.BackgroundColor = selected ? _menu.ForegroundColor : _menu.BackgroundColor;
+        Console.WriteLine($" {menuItem} ");
+
+        Console.ForegroundColor = foreGroundSave;
+        Console.BackgroundColor = backGroundSave;
+    }
+
+
+    private void DisplayMenuItemOld(int i,string menuItem, ConsoleColor fgColor, ConsoleColor bgColor)
     {
         var x = _menu.X + _menu.OffsetX;
         var y = _menu.Y + _menu.OffsetY + i;
@@ -178,8 +139,60 @@ public class FluentConsoleMenuGenerator : ICanSetTitle, ICanSetCoordinates, ICan
         Console.ForegroundColor = foreGroundSave;
         Console.BackgroundColor = backGroundSave;
     }
+    private void GetSelection()
+    {
+        ConsoleKey key;
 
-    private void CleanUp()
+        var selected = 0;
+
+        do
+        {
+            key = Console.ReadKey(true).Key;
+            switch (key)
+            {
+                case ConsoleKey.UpArrow:
+                    if (selected != 0)
+                    {
+                        selected--;
+                    }
+
+                    break;
+                case ConsoleKey.DownArrow:
+                    if (selected < _menu.MenuItems.Count - 1)
+                    {
+                        selected += 1;
+                    }
+                    break;
+                case ConsoleKey.Escape:
+                    selected = -1;
+                    break;
+                default:
+                    selected = -1;
+                    break;
+            }
+
+            if (selected < _menu.MaximumToDisplay - 1)
+            {
+                for (var i = 0; i < _menu.MaximumToDisplay; i++)
+                {
+                    DisplayMenuItem(i, _menu.MenuItems[i], i == selected);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < _menu.MaximumToDisplay - 1; i++)
+                {
+                    DisplayMenuItem(i, _menu.MenuItems[selected - (_menu.MaximumToDisplay - 1) + i], false);
+                }
+                DisplayMenuItem(_menu.MaximumToDisplay - 1, _menu.MenuItems[selected], true);
+            }
+
+        }
+        while (key != ConsoleKey.Enter && key != ConsoleKey.Escape) ;
+
+        _selected = selected == -1 ? string.Empty : _menu.MenuItems[selected];
+    }
+    private static void CleanUp()
     {
         Console.CursorVisible = true;
     }

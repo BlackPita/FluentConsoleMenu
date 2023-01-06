@@ -4,31 +4,20 @@ namespace FluentConsoleMenu.Models
 {
     public class Menu
     {
-        public string Title { get; set; }
-        public string? Description { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int OffsetX { get; set; }
-        public int OffsetY { get; set; }
-        public ConsoleColor ForegroundColor { get; set; }
-        public ConsoleColor BackgroundColor { get; set; }
-        public int MaximumToDisplay { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string? Description { get; set; } = string.Empty;
+        public int X { get; set; } = 0;
+        public int Y { get; set; } = 0;
+        public int OffsetX { get; set; } = 1;
+        public int OffsetY { get; set; } = 1;
+        public ConsoleColor ForegroundColor { get; set; } = ConsoleColor.White;
+        public ConsoleColor BackgroundColor { get; set; } = ConsoleColor.Black;
+        public int MaximumToDisplay { get; set; } = 5;
         public int MaximumDisplayed => MaximumToDisplay > MenuItems.Count ? MenuItems.Count : MaximumToDisplay;
-
-        public List<string> MenuItems { get; set; }
+        public List<string> MenuItems { get; set; }= new List<string>();
 
         public Menu()
         {
-            Title = string.Empty;
-            Description = string.Empty;
-            X = 0;
-            Y = 0;
-            OffsetX = 1;
-            OffsetY = 1;
-            ForegroundColor = ConsoleColor.White;
-            BackgroundColor = ConsoleColor.Black;
-            MaximumToDisplay = 5;
-            MenuItems = new List<string>();
 
         }
             
