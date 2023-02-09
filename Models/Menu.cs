@@ -14,12 +14,6 @@ namespace FluentConsoleMenu.Models
         public ConsoleColor BackgroundColor { get; set; } = ConsoleColor.Black;
         public int MaximumToDisplay { get; set; } = 5;
         public int MaximumDisplayed => MaximumToDisplay > MenuItems.Count ? MenuItems.Count : MaximumToDisplay;
-        public List<string> MenuItems { get; set; }= new List<string>();
-
-        public Menu()
-        {
-
-        }
-            
+        public List<MenuItem> MenuItems { get; set; }= new List<MenuItem>();
     }
 }

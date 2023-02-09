@@ -1,7 +1,9 @@
-﻿namespace FluentConsoleMenu.Interfaces;
+﻿using FluentConsoleMenu.Models;
+
+namespace FluentConsoleMenu.Interfaces;
 
 public interface ICanSetMenuItems : ICanShowMenu
 {
-    public ICanSetMenuItems WithMenuItem(string menuItem);
+    public ICanSetMenuItems WithMenuItem(string code, string text);
     
 }
