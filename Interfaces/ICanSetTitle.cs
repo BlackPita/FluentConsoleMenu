@@ -2,6 +2,6 @@
 {
     public interface ICanSetTitle
     {
-        public ICanSetCoordinates WithTitle(string title);
+        public ICanSetMenuProperties WithTitle(string title);
     }
 }
